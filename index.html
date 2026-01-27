@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Shooter Exam</title>
+    <style>
+        #spacecanvas{
+            border: 5px solid red;
+            background : url("img/darkspace.jpg");
+            -webkit-animation: animatedBackground 20s linear infinite;
+            background-repeat: repeat-y;
+        }
+        @-webkit-keyframes animatedBackground {
+            from { background-position: 0 0; }
+            to { background-position: 0 2000px; }
+        }
+        html {
+        background-color: black; 
+        }
+        canvas {
+        display:block;
+        margin:30px auto 0;
+        border:1px dashed #ccc;
+        background:#000;
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="spacecanvas" width="600" height="600"></canvas>
+		<script src = "script.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+</body>
+</html>
