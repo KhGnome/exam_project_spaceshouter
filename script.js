@@ -5,6 +5,32 @@ var spacecanvas = document.getElementById("spacecanvas");
 var kills = 0, alive = true, lives = 3;
 var gameStarted = false, gameSpeed = 1000/30;
 var timer = 0;
+var formSubmitted = false;
+var highScore = 0;
+var restartListenerAdded = false;
+
+
+var nameRegex = /^[A-Za-z0-9]{3,10}$/;
+
+(function () {
+    var form = document.getElementById("playerForm");
+    var input = document.getElementById("playerName");
+    var nameRegex = /^[A-Za-z0-9]{3,10}$/;
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault(); // prevents reload
+
+        if (nameRegex.test(input.value)) {
+            localStorage.setItem("playerName", input.value);
+            formSubmitted = true;
+        } else {
+            alert("Invalid name (3–10 letters/numbers)");
+        }
+    });
+})();
+
+
+
 
 
 var ship = { //Object ship which contains all attributes of the ship
@@ -37,6 +63,11 @@ function clearCanvas() {
 }
 
 function init() {
+    var storedHighScore = localStorage.getItem("highScore");
+    if (storedHighScore !== null) {
+        highScore = parseInt(storedHighScore);
+    }
+
 	enemyImage = new Image()
 	shipImage = new Image();
 	bulletImage = new Image();
@@ -51,8 +82,10 @@ function init() {
 }
 
 function gameStart() {
-	gameStarted = true;
-	spacecanvas.removeEventListener('click',gameStart,false);
+    if(formSubmitted){
+        gameStarted = true;
+        spacecanvas.removeEventListener('click',gameStart,false);
+    }
 }
 
 ///////////////////////////////////////////////////
@@ -84,9 +117,10 @@ function addEnemies() {
 }
 
 function drawEnemies() {
-	for(var i=0;i<enemyTotal;i++) {
-		enemyList[i].draw();
-	}
+	for (var i = 0; i < enemyList.length; i++) {
+    enemyList[i].draw();
+}
+
 }
 
 function moveEnemies() {
@@ -187,6 +221,8 @@ function displayScore() {
 	ctx.fillText(kills, 550, 30);
 	ctx.fillText('Lives:', 10, 30);
 	ctx.fillText(lives, 68, 30);
+    ctx.fillText("High:", 380, 30);
+    ctx.fillText(highScore, 430, 30);
 	
 	if (!gameStarted) {
   		ctx.font = 'bold 25px Orbitron';
@@ -198,10 +234,15 @@ function displayScore() {
 	}
 
 	if (!alive) {
-  		ctx.fillText('Game Over!',245,spaceHeight/2);
-  		ctx.fillText('Click anywhere to play again',spaceWidth/2-110,spaceHeight/2+25);
-  		spacecanvas.addEventListener('click',gameRestart,false);
-	}
+    ctx.fillText('Game Over!',245,spaceHeight/2);
+    ctx.fillText('Click anywhere to play again',spaceWidth/2-110,spaceHeight/2+25);
+
+    if (!restartListenerAdded) {
+        spacecanvas.addEventListener('click', gameRestart, false);
+        restartListenerAdded = true;
+    }
+}
+
 }
 
 function checkLives() {
@@ -222,30 +263,41 @@ function reset() {
 }
 
 function gameRestart() {
-	ship.x = 245;
-	ship.y = 525;
-	kills = 0;
-	lives = 3;
-	enemyList = [];
-	alive = true;
-	addEnemies();
-	spacecanvas.removeEventListener('click',gameRestart,false);
+    if (kills > highScore) {
+        highScore = kills;
+        localStorage.setItem("highScore", highScore);
+    }
+
+    ship.x = 245;
+    ship.y = 525;
+    kills = 0;
+    lives = 3;
+    enemyList = [];
+    alive = true;
+    gameStarted = false;
+    restartListenerAdded = false;
+
+    addEnemies();
+
+    spacecanvas.removeEventListener('click', gameRestart, false);
+    spacecanvas.addEventListener('click', gameStart, false);
 }
 
+
 document.onkeydown = function(event) {
-	if (event.keyCode == 37) {  //Left arrow key pressed
+	if (event.keyCode == 37) { 
 		ship.x = ship.x-20;
 	}
-	else if (event.keyCode == 38) { //Up arrow key
+	else if (event.keyCode == 38) { 
 		ship.y = ship.y-20;
 	}
-	else if (event.keyCode == 39) { //Right arrow key
+	else if (event.keyCode == 39) { 
 		ship.x = ship.x+20;
 	}
-	else if (event.keyCode == 40) { //Down arrow key
+	else if (event.keyCode == 40) { 
 		ship.y = ship.y+20;
 	}
-	else if (event.keyCode == 32 && bulletList.length <= bulletTotal) { //Space pressed 
+	else if (event.keyCode == 32 && bulletList.length <= bulletTotal) {
 		var b = new bullet(ship.x+25,ship.y-10,ship.speedBullet)
 		bulletList.push(b);	
 	}
@@ -279,3 +331,5 @@ function gameLoop() {
 }
 
 window.onload = init;
+
+
